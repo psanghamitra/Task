@@ -1,0 +1,79 @@
+Part V - Back-end skills (SQL OR LINQ):
+
+1. Customer:
+a. CustomerId (primary key, int, not null)
+b. Name (varchar(50))
+
+2. Product:
+a. ProductId (primary key, int, not null)
+b. Name (varchar(100))
+c. Price (decimal(12, 2))
+
+3. Order
+a. OrderId (primary key, int, not null)
+b. CustomerId (foreign key, int, not null)
+c. CreatedAt (datetime, not null)
+
+4. OrderProduct
+a. OrderProductId (primary key, int, not null)
+b. OrderId (foreign key, int, not null)
+c. ProductId (foreign key, int, not null)
+
+
+Imagine the following schema in a database.
+Write the SQL/ LINQ queries to return data for the following requirements.
+Queries do not need to be executed. You can use a simple text editor.
+● all the customers whose name begins with "Joe"
+● all the product names ordered by customer "Joe" after '11/1/2016'
+● the total amount spend by customer "Joe"
+● all the customer names and count of their orders for orders containing more than one
+product
+
+ all the customers whose name begins with "Joe"
+ 
+customers.startWith(x=>x.Name.StartWith("Joy"));
+
+select * from Customers where Name like('Joy%');
+
+all the product names ordered by customer "Joe" after '11/1/2016'
+
+from c in Custiomer join o in Order on c.CustomerId equals o.CustomerId where c.Name(StartWith("Jio")) and c.CreatedAt> Convert.ToDateTiume("11/1/2016") select new{
+c.CustomerId,
+c.Name,
+o.CreatedAt
+}  order by c.Name 
+
+select c.CustomerId,c.Name,o.CreatedAt from Custiomer c join Order o on c.CustomerId = o.CustomerId whare c.Name like 'Jio%' and c.CreatedAt > Date('11/1/2016') order by c.Name
+
+the total amount spend by customer "Joe"
+
+int price=0;
+var v=from c in Customer 
+join o in Order on c.customerId equals o.CustomerId
+join op in OrderProduct on o.OrderId equals op.OrderId
+join p in Product on op.ProductId equals p.ProductId where c.Name=="Jio"
+select new{
+op.price
+} 
+
+for(int i=0;i<v.Count;i++){
+price=price+v[i];
+}
+
+select count(Price) count from Product where ProductId in(select ProductId from OrderProduct where OrderId in(select OrderId from Order where CustomerId in(select CustomerId from Customer where Name='Jio')));
+
+● all the customer names and count of their orders for orders containing more than one
+product
+
+var v=from c in Customer 
+join o in Order on c.customerId equals o.CustomerId
+join op in OrderProduct on o.OrderId equals op.OrderId
+join p in Product on op.ProductId equals p.ProductId into result groupjoin (c,result)=>
+select new{
+Name=c.Name,
+Money=count(op.Price)
+} 
+
+select c.Id,c.Name,count(op.price)  from Custiomer c join Order o on c.customerId = o.CustomerId
+join OrderProduct op on o.OrderId = op.OrderId
+join Product p on  op.ProductId = p.ProductId group by c.Id
